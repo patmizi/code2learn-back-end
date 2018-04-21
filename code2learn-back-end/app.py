@@ -5,6 +5,8 @@ import uuid
 app = Chalice(app_name='code2learn-back-end')
 app.debug = True
 
+MAX_GROUP_LIMIT = 5
+
 def verify_userid(id, client):
     if len(id) <= 0 :
         raise ValueError('No ID was provided')
@@ -73,6 +75,54 @@ def add_saved_event(id, to_add, client):
         },
             upsert=True
         )
+    except Exception as e:
+        raise Exception("An error occured when trying to connect to the database: ", e.message)
+
+def create_group(group, event_id, client):
+    person_ids = []
+    person_data = []
+    for person in group:
+        if 'person-id' in person:
+            person_ids.append(person['person-id'])
+    # Find persondata for group members
+    pointer = client["users"].find({"_id":{"$in":person_ids}}, {"username":0, "password":0})
+    for person in pointer:
+        person_data.append(person)
+    # Find event data for event id
+    event_data = client["events"].find_one({"_id":event_id})
+    # Add an event group
+    client["event_groups"].insert_one({
+        "event": event_data,
+        "members": person_data
+    })
+    # Remove data from queue
+    client["lfg_queue"].remove_many({"event-id": event_id, "person-id": { "$in": person_ids }})
+
+def join_lfg_queue(person_id, event_id, client):
+    try:
+        exists = client["lfg_queue"].find({"event-id": event_id, "person-id": person_id}).count()
+        if exists > 0:
+            raise Exception("User is already in queue")
+        client["lfg_queue"].insert_one({ "event-id": event_id, "person-id": person_id })
+        queue = []
+        pointer = client["lfg_queue"].find({"event-id": event_id})
+        for event in pointer:
+            if 'event-id' in event:
+                queue.append(event)
+        if len(queue) >= MAX_GROUP_LIMIT:
+            create_group(queue[:MAX_GROUP_LIMIT-1], event_id, client)
+    except Exception as e:
+        raise Exception("An error occured when trying to connect to the database: ", e.message)
+
+def list_joined_groups(person_id, client):
+    try:
+        event_groups = []
+        pointer = client["event_groups"].find({"members":{"$eq":{person_id}}})
+        for event in pointer:
+            print(event)
+            if 'event' in event:
+                event_groups.append(event)
+        return event_groups
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
 
@@ -151,6 +201,25 @@ def get_event_by_id(id):
     try:
         event = get_event(id, db_client)
         return event
+    except Exception as e:
+        return BadRequestError(e)
+
+@app.route('/event/group/join', methods=['POST'], cors=True)
+def join_event_group():
+    body = app.current_request.json_body
+    db_client = connect__mongodb()
+    try:
+        join_lfg_queue(body["person-id"], body["event-id"], db_client)
+        return
+    except Exception as e:
+        return BadRequestError(e)
+
+@app.route('/person/groups/list', methods=['POST'], cors=True)
+def list_person_groups():
+    body = app.current_request.json_body
+    db_client = connect__mongodb()
+    try:
+        return list_joined_groups(body["_id"], db_client)
     except Exception as e:
         return BadRequestError(e)
 
