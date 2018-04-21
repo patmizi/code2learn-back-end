@@ -101,13 +101,15 @@ def filter_match(calculatedMatch):
         '679765348967458967459863':  0.4, #([[0.50, 0.60, 0.17, 0.46, 0.27]])
         '189765348967458967459864': 0.126 #([[0.37, 0.23, 0.01, 0.01, 0.01]]) 
     }
+    ordered_dict = {}
     # append the new key-value pair
     filtered_dict.update(calculatedMatch)
 
     # sort the filtered dictionary base on values
-    sorted_dict = sorted(filtered_dict.values())
-    for key, value in sorted(filtered_dict.values()):
-        return key, value    
+    #sorted_dict = sorted(filtered_dict.values())
+    for key, value in sorted(filtered_dict.items()):
+        ordered_dict.update({key: value})
+    return ordered_dict    
     #return sorted_dict
 
 
