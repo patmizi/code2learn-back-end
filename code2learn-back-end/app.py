@@ -1,10 +1,37 @@
 from chalice import Chalice
+from pymongo import MongoClient
 
 app = Chalice(app_name='code2learn-back-end')
+app.debug = True
 
+def connect__mongodb(user="monkas-user", password="2~uNTmY@", address="ds031167.mlab.com",
+                     port="31167", db_name="monkas-c2l"):
+    #
+    #   Function: Facilitates the connection and access to MongoDB.
+    #
 
-@app.route('/')
+    #   Create a connection to a MongoDB instance.
+    if user or password or address or db_name:
+
+        #   If a defined database with its respective details are set, connect to it.
+        connection = MongoClient(address, int(port))
+        db = connection[db_name]
+        db.authenticate(user, password)
+
+    else:
+
+        #   If there is no defined database, connect to the default database.
+        client = MongoClient()
+        db = client["monkas-c2l"]
+
+    return db
+
+@app.route('/test')
 def index():
+    client = connect__mongodb()
+    client["test"].insert_one({
+        "hello": "world"
+    })
     return {'hello': 'world'}
 
 
