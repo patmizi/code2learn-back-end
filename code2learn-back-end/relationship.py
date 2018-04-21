@@ -56,11 +56,11 @@ print(event_sum)
 
 # calculate percentage of event
 perc_event = event_sum/len(event1_tag)
-print(perc_event)
+print("Event: ", perc_event)
 
 # calculate percentage of person trait
 perc_trait = np.matrix(trait_matrix)/100
-print(perc_trait)
+print("Person: ", perc_trait)
 
 #calculate trait percentage differences between event and person
 perc_diff = abs(np.subtract(perc_event, perc_trait))
