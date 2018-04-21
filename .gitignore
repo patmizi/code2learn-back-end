@@ -1,0 +1,3 @@
+./code2learn-back-end/chalice/deployments/*
+./code2learn-back-end/chalice/venv/*
+./venv/*
