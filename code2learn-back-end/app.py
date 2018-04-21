@@ -1,4 +1,4 @@
-from chalice import Chalice, Response
+from chalice import Chalice, Response, BadRequestError, UnauthorizedError
 from pymongo import MongoClient
 import uuid
 
@@ -9,7 +9,11 @@ def verify_userid(id, client):
     if len(id) <= 0 :
         raise ValueError('No ID was provided')
     try:
-        return client["users"].find_one({"_id": str(id)})
+        res = client["users"].find_one({"_id": str(id)}, { "password": 0 })
+        if '_id' in res:
+            return res
+        else:
+            raise Exception('The id provided is invalid')
     except Exception as e:
         raise Exception("An error has occured when trying to verify the user: ", e.message)
 
@@ -20,6 +24,17 @@ def get_login_token(username, password, client):
         return client["users"].find_one({"username": username, "password": password}, {"_id": 1})
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
+
+def get_filtered_events(filter, client):
+    # TODO: Add filter
+    try:
+        events = []
+        pointer = client["events"].find({}, {"attributes":0})
+        for event in pointer:
+            events.append(event)
+        return events
+    except Exception as e:
+        raise Exception("An error occured when trying to connect to the database: " + e.message)
 
 def generate_uuid():
     return uuid.uuid4()
@@ -46,16 +61,20 @@ def connect__mongodb(user="monkas-user", password="2~uNTmY@", address="ds031167.
 
     return db
 
+
+
 @app.route('/add-user', methods=['POST'])
 def add_user():
     body = app.current_request.json_body
     db_client = connect__mongodb()
     if len(body["username"]) <= 0:
+        # 400 Error Response
         return Response(body='No username was provided',
                         status_code=400,
                         headers={'Content-Type': 'text/plain'})
     matching_users = db_client["users"].find_one({ "username": body["username"] })
     if matching_users is not None:
+        # 400 Error Response
         return Response(body='Username is already in use',
                         status_code=400,
                         headers={'Content-Type': 'text/plain'})
@@ -71,11 +90,17 @@ def verify_user():
         token = get_login_token(body["username"], body["password"], db_client)
         return { "token": token["_id"] }
     except Exception as e:
-        return Response(
-            body='Could not verify the user: ' + e.message,
-            status_code=400,
-            headers={'Content-Type': 'text/plain'})
+        return BadRequestError(e)
 
 @app.route('/get-events', methods=['POST'])
 def get_events():
-    return { "hello" : "world" }
+    body = app.current_request.json_body
+    db_client = connect__mongodb()
+    try:
+        events = get_filtered_events(body, db_client)
+        # do some cool filtering here
+        return events
+    except Exception as e:
+        return BadRequestError(e)
+
+

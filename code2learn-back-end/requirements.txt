@@ -5,6 +5,7 @@ click==6.6
 docutils==0.14
 enum34==1.1.6
 jmespath==0.9.3
+numpy==1.14.2
 pymongo==3.6.1
 python-dateutil==2.7.2
 six==1.11.0
