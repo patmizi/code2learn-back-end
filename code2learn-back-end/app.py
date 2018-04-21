@@ -41,6 +41,36 @@ def get_event(id, client):
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
 
+def get_saved_events(id, client):
+    try:
+        events = []
+        pointer = client["users"].find({"_id":id}, {"events":1, "_id":0})
+        for person in pointer:
+            for event in person["events"]:
+                if event not in events:
+                    events.append(event)
+        return events
+    except Exception as e:
+        raise Exception("An error occured when trying to connect ot the database: ", e.message)
+
+def add_saved_event(id, to_add, client):
+    try:
+        events = get_saved_events(id, client)
+        for event in events:
+            if event["event-id"] == to_add["event-id"]:
+                return events
+        client["users"].update_one({
+            '_id':id
+        }, {
+            '$inc':{
+                "events": to_add
+            }
+        },
+            upsert=True
+        )
+    except Exception as e:
+        raise Exception("An error occured when trying to connect to the database: ", e.message)
+
 def generate_uuid():
     return uuid.uuid4()
 
@@ -119,6 +149,22 @@ def get_event_by_id(id):
     except Exception as e:
         return BadRequestError(e)
 
-@app.route('/person/get/events')
-def get_saved_events():
-    return {}
+@app.route('/person/events/get', methods=['POST'])
+def get_events_saved():
+    body = app.current_request.json_body
+    db_client = connect__mongodb()
+    try:
+        events = get_saved_events(body["_id"], db_client)
+        return events
+    except Exception as e:
+        return BadRequestError(e)
+
+@app.route('/person/events/save', methods=['POST'])
+def save_event():
+    body = app.current_request.json_body
+    db_client = connect__mongodb()
+    try:
+        add_saved_event(body["_id"], body["event"], db_client)
+        return get_saved_events(body["_id"], db_client)
+    except Exception as e:
+        return BadRequestError(e)
