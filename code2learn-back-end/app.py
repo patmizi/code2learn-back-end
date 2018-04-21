@@ -25,16 +25,21 @@ def get_login_token(username, password, client):
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
 
-def get_filtered_events(filter, client):
-    # TODO: Add filter
+def get_events(client):
     try:
         events = []
-        pointer = client["events"].find({}, {"attributes":0})
+        pointer = client["events"].find({}, {"attributes": 0})
         for event in pointer:
             events.append(event)
         return events
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: " + e.message)
+
+def get_event(id, client):
+    try:
+        return client["events"].find_one({"_id":id}, {"attributes": 0})
+    except Exception as e:
+        raise Exception("An error occured when trying to connect to the database: ", e.message)
 
 def generate_uuid():
     return uuid.uuid4()
@@ -63,7 +68,7 @@ def connect__mongodb(user="monkas-user", password="2~uNTmY@", address="ds031167.
 
 
 
-@app.route('/add-user', methods=['POST'])
+@app.route('/user/add', methods=['POST'])
 def add_user():
     body = app.current_request.json_body
     db_client = connect__mongodb()
@@ -82,7 +87,7 @@ def add_user():
     db_client["users"].insert_one(body)
     return { "res": body }
 
-@app.route('/verify-user', methods=['POST'])
+@app.route('/user/verify', methods=['POST'])
 def verify_user():
     body = app.current_request.json_body
     db_client = connect__mongodb()
@@ -92,15 +97,28 @@ def verify_user():
     except Exception as e:
         return BadRequestError(e)
 
-@app.route('/get-events', methods=['POST'])
-def get_events():
-    body = app.current_request.json_body
+@app.route('/event/list', methods=['GET', 'POST'])
+def get_all_events():
+    request = app.current_request
     db_client = connect__mongodb()
     try:
-        events = get_filtered_events(body, db_client)
-        # do some cool filtering here
+        events = get_events(db_client)
+        if request.method == "POST":
+            # filter for a suggested list
+            print("filter")
         return events
     except Exception as e:
         return BadRequestError(e)
 
+@app.route('/event/get/{id}')
+def get_event_by_id(id):
+    db_client = connect__mongodb()
+    try:
+        event = get_event(id, db_client)
+        return event
+    except Exception as e:
+        return BadRequestError(e)
 
+@app.route('/person/get/events')
+def get_saved_events():
+    return {}
