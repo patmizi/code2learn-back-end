@@ -92,11 +92,12 @@ def create_group(group, event_id, client):
     event_data = client["events"].find_one({"_id":event_id})
     # Add an event group
     client["event_groups"].insert_one({
+        "_id": str(generate_uuid()),
         "event": event_data,
         "members": person_data
     })
     # Remove data from queue
-    client["lfg_queue"].remove_many({"event-id": event_id, "person-id": { "$in": person_ids }})
+    client["lfg_queue"].remove({"event-id": event_id, "person-id": { "$in": person_ids }})
 
 def join_lfg_queue(person_id, event_id, client):
     try:
@@ -110,16 +111,15 @@ def join_lfg_queue(person_id, event_id, client):
             if 'event-id' in event:
                 queue.append(event)
         if len(queue) >= MAX_GROUP_LIMIT:
-            create_group(queue[:MAX_GROUP_LIMIT-1], event_id, client)
+            create_group(queue[:MAX_GROUP_LIMIT], event_id, client)
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
 
 def list_joined_groups(person_id, client):
     try:
         event_groups = []
-        pointer = client["event_groups"].find({"members":{"$eq":{person_id}}})
+        pointer = client["event_groups"].find({"members._id": person_id})
         for event in pointer:
-            print(event)
             if 'event' in event:
                 event_groups.append(event)
         return event_groups
@@ -219,7 +219,8 @@ def list_person_groups():
     body = app.current_request.json_body
     db_client = connect__mongodb()
     try:
-        return list_joined_groups(body["_id"], db_client)
+        events = list_joined_groups(body["_id"], db_client)
+        return events
     except Exception as e:
         return BadRequestError(e)
 
