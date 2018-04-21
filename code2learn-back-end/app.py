@@ -25,10 +25,14 @@ def get_login_token(username, password, client):
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
 
-def get_events(client):
+def get_events(client, event_ids=[]):
     try:
+        print(event_ids)
         events = []
-        pointer = client["events"].find({}, {"attributes": 0})
+        if len(event_ids) <= 0:
+            pointer = client["events"].find({}, {"attributes": 0})
+        else:
+            pointer = client["events"].find({"_id": {"$in":event_ids}}, {"attributes": 0})
         for event in pointer:
             events.append(event)
         return events
@@ -44,14 +48,15 @@ def get_event(id, client):
 def get_saved_events(id, client):
     try:
         events = []
-        pointer = client["users"].find({"_id":id}, {"events":1, "_id":0})
-        for person in pointer:
-            for event in person["events"]:
-                if event not in events:
-                    events.append(event)
-        return events
+        person = client["users"].find_one({"_id": id})
+        if 'events' not in person:
+            return []
+        for event in person["events"]:
+            if event not in events:
+                events.append(event["event-id"])
+        return get_events(client, events)
     except Exception as e:
-        raise Exception("An error occured when trying to connect ot the database: ", e.message)
+        raise Exception("An error occured when trying to connect to the database: ", e.message)
 
 def add_saved_event(id, to_add, client):
     try:
@@ -98,7 +103,7 @@ def connect__mongodb(user="monkas-user", password="2~uNTmY@", address="ds031167.
 
 
 
-@app.route('/user/add', methods=['POST'])
+@app.route('/user/add', methods=['POST'], cors=True)
 def add_user():
     body = app.current_request.json_body
     db_client = connect__mongodb()
@@ -117,7 +122,7 @@ def add_user():
     db_client["users"].insert_one(body)
     return { "res": body }
 
-@app.route('/user/verify', methods=['POST'])
+@app.route('/user/verify', methods=['POST'], cors=True)
 def verify_user():
     body = app.current_request.json_body
     db_client = connect__mongodb()
@@ -127,7 +132,7 @@ def verify_user():
     except Exception as e:
         return BadRequestError(e)
 
-@app.route('/event/list', methods=['GET', 'POST'])
+@app.route('/event/list', methods=['GET', 'POST'], cors=True)
 def get_all_events():
     request = app.current_request
     db_client = connect__mongodb()
@@ -140,7 +145,7 @@ def get_all_events():
     except Exception as e:
         return BadRequestError(e)
 
-@app.route('/event/get/{id}')
+@app.route('/event/get/{id}', cors=True)
 def get_event_by_id(id):
     db_client = connect__mongodb()
     try:
@@ -149,7 +154,7 @@ def get_event_by_id(id):
     except Exception as e:
         return BadRequestError(e)
 
-@app.route('/person/events/get', methods=['POST'])
+@app.route('/person/events/get', methods=['POST'], cors=True)
 def get_events_saved():
     body = app.current_request.json_body
     db_client = connect__mongodb()
@@ -159,7 +164,7 @@ def get_events_saved():
     except Exception as e:
         return BadRequestError(e)
 
-@app.route('/person/events/save', methods=['POST'])
+@app.route('/person/events/save', methods=['POST'], cors=True)
 def save_event():
     body = app.current_request.json_body
     db_client = connect__mongodb()
