@@ -1,8 +1,12 @@
-from chalice import Chalice
+from chalice import Chalice, Response
 from pymongo import MongoClient
+import uuid
 
 app = Chalice(app_name='code2learn-back-end')
 app.debug = True
+
+def generate_uuid():
+    return uuid.uuid4()
 
 def connect__mongodb(user="monkas-user", password="2~uNTmY@", address="ds031167.mlab.com",
                      port="31167", db_name="monkas-c2l"):
@@ -26,17 +30,22 @@ def connect__mongodb(user="monkas-user", password="2~uNTmY@", address="ds031167.
 
     return db
 
-@app.route('/test')
-def index():
-    client = connect__mongodb()
-    client["test"].insert_one({
-        "hello": "world"
-    })
-    return {'hello': 'world'}
+@app.route('/add-user', methods=['POST'])
+def add_user():
+    body = app.current_request.json_body
+    db_client = connect__mongodb()
+    if len(body["username"]) <= 0:
+        return Response(body='No username was provided', status_code=400, headers={'Content-Type': 'text/plain'})
+    matching_users = db_client["users"].find_one({ "username": body["username"] })
+    if matching_users is not None:
+        return Response(body='Username is already in use', status_code=400, headers={'Content-Type': 'text/plain'})
+    body["_id"] = str(generate_uuid())
+    db_client["users"].insert_one(body)
+    return { "res": body }
 
-@app.route('/test2')
-def index():
-    pass
+@app.route('/get-events', methods=['POST'])
+def get_events():
+    return { "hello" : "world" }
 
 # The view function above will return {"hello": "world"}
 # whenever you make an HTTP GET request to '/'.
