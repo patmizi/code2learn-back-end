@@ -29,7 +29,9 @@ def get_login_token(username, password, client):
 
 def get_events(client, event_ids=[]):
     try:
+        print("Before")
         print(event_ids)
+        print("after")
         events = []
         if len(event_ids) <= 0:
             pointer = client["events"].find({}, {"attributes": 0})
@@ -49,32 +51,37 @@ def get_event(id, client):
 
 def get_saved_events(id, client):
     try:
-        events = []
-        person = client["users"].find_one({"_id": id})
-        if 'events' not in person:
+        event_list = []
+        person = client["users"].find_one({"_id": str(id)})
+        if person is None or 'events' not in person:
             return []
         for event in person["events"]:
-            if event not in events:
-                events.append(event["event-id"])
-        return get_events(client, events)
+            if event not in event_list and 'event-id' in event:
+                event_list.append(event["event-id"])
+            elif event not in event_list and "_id" in event:
+                event_list.append(event["_id"])
+        return get_events(client, event_list)
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
 
 def add_saved_event(id, to_add, client):
     try:
         events = get_saved_events(id, client)
+        print("events")
+        print(events)
         for event in events:
-            if event["event-id"] == to_add["event-id"]:
+            if event == to_add["event-id"]:
                 return events
+        print("to add")
+        events.append(to_add)
+        print(events)
         client["users"].update_one({
             '_id':id
         }, {
-            '$inc':{
-                "events": to_add
+            "$set": {
+                "events": events
             }
-        },
-            upsert=True
-        )
+        },upsert=True)
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
 

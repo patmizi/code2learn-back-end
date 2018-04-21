@@ -6,6 +6,7 @@
     "date_start": "2018-04-19T14:00:00.000Z",
     "date_end": "2018-04-21T14:00:00.000Z",
     "location": "UTS, B11.04",
+    "image":"",
     "host": "ProgSoc & RoboSoc",
     "description": "Wisetech global hackathon",
     "attributes": [
@@ -29,6 +30,7 @@
     "date_start": "2018-05-01T15:30:00.000Z",
     "date_end": "2018-05-01T15:30:00.000Z",
     "location": "The Loft, UTS",
+    "image":"",
     "host": "UTS Drawing Circle",
     "description": "Our regular fortnightly Life Drawing sessions",
     "attributes": [
@@ -48,6 +50,7 @@
     "date_start": "2018-05-04T14:00:00.000Z",
     "date_end": "2018-05-04T14:00:00.000Z",
     "location": "The Loft, UTS",
+    "image":"",
     "host": "UTS, CB05C.02.054",
     "description": "Drawing Circle's regular Friday event! Drop by for some good times with free drawing and socialising; a great place to hang out at the end of the week!",
     "attributes": [
