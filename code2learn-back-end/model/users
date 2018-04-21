@@ -1,0 +1,13 @@
+{
+  "_id": "121212",
+  "username": "patty",
+  "password": "mizzi",
+  "traits": {
+    "category_1": 13,
+    "category_2": 1,
+    "category_3": 67,
+    "category_4": 34,
+    "category_5": 67
+  },
+  "last_logged_in": "2018-04-21T02:03:05.104Z"
+}
