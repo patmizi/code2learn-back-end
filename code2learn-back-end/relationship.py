@@ -43,12 +43,16 @@ tag_matix = [
 ]
 print(np.matrix(tag_matix))
 
+# appending events
+test_matrix = []
+for i in range(len(event2_tag)):
+    test_matrix.append(list(event2_tag.values())[i])
+print("test matrix: \n", np.matrix(test_matrix))
+
 trait_matrix = [
     list(trait.values())
 ]
-print(np.matrix(trait_matrix))
-
-
+print("Trait matrix: ", np.matrix(trait_matrix))
 
 # add the element of each event array in the dictionary
 event_sum = np.matrix(tag_matix).sum(axis=0)
@@ -66,6 +70,9 @@ print("Person: ", perc_trait)
 perc_diff = abs(np.subtract(perc_event, perc_trait))
 print("Diff: ", perc_diff)
 
+
+# filter funtion
+# return  
 
 
 # compare sum_event_point to perosnality?
