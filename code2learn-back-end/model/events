@@ -1,18 +1,68 @@
-{
-  "title": "code2learn hackathon",
-  "date_start": "adssdadsad",
-  "date_end": "",
-  "location": "",
-  "host": "sdsd",
-  "description": "",
-  "attributes": [
-    {
-      "name": "gaming",
-      "traits": [1,0,1,0,1]
-    },
-    {
-      "name": "drinking",
-      "traits": [0,1,1,1,0]
-    }
-  ]
-}
+// event_array=
+[
+  {
+    "_id": "9834718947198471",
+    "title": "code2learn hackathon",
+    "date_start": "2018-04-19T14:00:00.000Z",
+    "date_end": "2018-04-21T14:00:00.000Z",
+    "location": "UTS, B11.04",
+    "host": "ProgSoc & RoboSoc",
+    "description": "Wisetech global hackathon",
+    "attributes": [
+      {
+        "name": "hackathon",
+        "traits": [1,0,1,1,1]
+      },
+      {
+        "name": "coding",
+        "traits": [0,1,1,1,0]
+      },
+      {
+        "name": "innovation",
+        "traits": [1,1,1,1,1]
+      }
+    ]
+  },
+  {
+    "_id": "589765348967458967459867",
+    "title": "Life Drawing 2018",
+    "date_start": "2018-05-01T15:30:00.000Z",
+    "date_end": "2018-05-01T15:30:00.000Z",
+    "location": "The Loft, UTS",
+    "host": "UTS Drawing Circle",
+    "description": "Our regular fortnightly Life Drawing sessions",
+    "attributes": [
+      {
+        "name": "drawing",
+        "traits": [1,0,1,0,1]
+      },
+      {
+        "name": "privacy",
+        "traits": [1,1,1,1,0]
+      }
+    ]
+  },
+  {
+    "_id": "389073489574398567439867",
+    "title": "Etch n Sketch 2018",
+    "date_start": "2018-05-04T14:00:00.000Z",
+    "date_end": "2018-05-04T14:00:00.000Z",
+    "location": "The Loft, UTS",
+    "host": "UTS, CB05C.02.054",
+    "description": "Drawing Circle's regular Friday event! Drop by for some good times with free drawing and socialising; a great place to hang out at the end of the week!",
+    "attributes": [
+      {
+        "name": "drawing",
+        "traits": [1,0,1,0,1]
+      },
+      {
+        "name": "social",
+        "traits": [1,1,0,1,0]
+      },
+      {
+        "name": "free",
+        "traits": [0,0,0,0,1]
+      }
+    ]
+  }
+]
