@@ -291,6 +291,19 @@ def remove_queue_position():
     body = app.current_request.json_body
     db_client = connect__mongodb()
     try:
-        db_client["lfg_queue"]
+        db_client["lfg_queue"].remove({"person-id": body["_id"], "event-id": body["event-id"]})
+        return
+    except Exception as e:
+        return BadRequestError(e)
+
+@app.route('/personlist/all', methods=['GET'], cors=True)
+def get_user_list():
+    db_client = connect__mongodb()
+    try:
+        people = []
+        cursor = db_client["users"].find({})
+        for person in cursor:
+            people.append(person)
+        return people
     except Exception as e:
         return BadRequestError(e)
