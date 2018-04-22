@@ -111,7 +111,7 @@ def join_lfg_queue(person_id, event_id, client):
         exists = client["lfg_queue"].find({"event-id": event_id, "person-id": person_id}).count()
         if exists > 0:
             raise Exception("User is already in queue")
-        client["lfg_queue"].insert_one({ "event-id": event_id, "person-id": person_id })
+        client["lfg_queue"].insert_one({ "_id": generate_uuid(),"event-id": event_id, "person-id": person_id })
         queue = []
         pointer = client["lfg_queue"].find({"event-id": event_id})
         for event in pointer:
@@ -130,6 +130,17 @@ def list_joined_groups(person_id, client):
             if 'event' in event:
                 event_groups.append(event)
         return event_groups
+    except Exception as e:
+        raise Exception("An error occured when trying to connect to the database: ", e.message)
+
+def list_queue_status(person_id, client):
+    try:
+        events = []
+        cursor = client["lfg_queue"].find({"person-id": person_id})
+        for event in cursor:
+            if 'event-id' in event :
+                events.append(event)
+        return events
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
 
@@ -262,5 +273,15 @@ def save_event():
     try:
         add_saved_event(body["_id"], body["event"], db_client)
         return get_saved_events(body["_id"], db_client)
+    except Exception as e:
+        return BadRequestError(e)
+
+@app.route('/person/queue/list', methods=["POST"], cors=True)
+def get_queue_status():
+    body = app.current_request.json_body
+    db_client = connect__mongodb()
+    try:
+        events = list_queue_status(body["_id"], db_client)
+        return events
     except Exception as e:
         return BadRequestError(e)
