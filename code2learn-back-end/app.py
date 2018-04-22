@@ -111,7 +111,7 @@ def join_lfg_queue(person_id, event_id, client):
         exists = client["lfg_queue"].find({"event-id": event_id, "person-id": person_id}).count()
         if exists > 0:
             raise Exception("User is already in queue")
-        client["lfg_queue"].insert_one({ "_id": generate_uuid(),"event-id": event_id, "person-id": person_id })
+        client["lfg_queue"].insert_one({ "_id": str(generate_uuid()),"event-id": event_id, "person-id": person_id })
         queue = []
         pointer = client["lfg_queue"].find({"event-id": event_id})
         for event in pointer:
@@ -283,5 +283,14 @@ def get_queue_status():
     try:
         events = list_queue_status(body["_id"], db_client)
         return events
+    except Exception as e:
+        return BadRequestError(e)
+
+@app.route('/person/queue/remove', methods=['POST'], cors=True)
+def remove_queue_position():
+    body = app.current_request.json_body
+    db_client = connect__mongodb()
+    try:
+        db_client["lfg_queue"]
     except Exception as e:
         return BadRequestError(e)
