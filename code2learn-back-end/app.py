@@ -133,6 +133,12 @@ def list_joined_groups(person_id, client):
     except Exception as e:
         raise Exception("An error occured when trying to connect to the database: ", e.message)
 
+def get_group(id, client):
+    try:
+        return client["event_groups"].find_one({"_id":id})
+    except Exception as e:
+        raise Exception("An error occured when trying to connect to the database: ", e.message)
+
 def generate_uuid():
     return uuid.uuid4()
 
@@ -228,6 +234,14 @@ def list_person_groups():
     try:
         events = list_joined_groups(body["_id"], db_client)
         return events
+    except Exception as e:
+        return BadRequestError(e)
+
+@app.route('/person/groups/get/{id}', cors=True)
+def get_group_by_id(id):
+    db_client = connect__mongodb()
+    try:
+        return get_group(id, db_client)
     except Exception as e:
         return BadRequestError(e)
 
